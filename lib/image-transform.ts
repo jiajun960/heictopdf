@@ -27,9 +27,9 @@ export async function transformImageWithCanvas({
   output?: 'dataURL' | 'blob',
 }): Promise<string | Blob> {
   // Calculate target size
-  let w = width || (image as any).width;
-  let h = height || (image as any).height;
-  let angle = (rotate % 360 + 360) % 360;
+  const w = width || (image as HTMLImageElement | ImageBitmap).width;
+  const h = height || (image as HTMLImageElement | ImageBitmap).height;
+  const angle = (rotate % 360 + 360) % 360;
   let drawW = w, drawH = h;
   if (angle === 90 || angle === 270) {
     drawW = h;

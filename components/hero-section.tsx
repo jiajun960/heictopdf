@@ -2,19 +2,22 @@
 
 import type React from "react"
 
-import { useState, useCallback, useRef, useEffect } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Upload, X, Download, ArrowUpDown, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import EditToolbar from './edit-toolbar';
 import { transformImageWithCanvas } from "@/lib/image-transform";
+import Logo from './logo';
 
 interface ImageFile {
   id: string
   file: File
   preview: string
   name: string
+  width?: number // 图片宽度
+  height?: number // 图片高度
   rotate: number // 角度，0/90/180/270
   flipH: boolean // 水平翻转
   flipV: boolean // 垂直翻转
@@ -25,7 +28,6 @@ interface ImageFile {
 }
 
 // 1. 文件顶部加类型声明（临时方案）
-// @ts-expect-error: no types for libheif-js
 // eslint-disable-next-line
 
 export default function HeroSection() {
@@ -42,6 +44,8 @@ export default function HeroSection() {
   const handleMarginChange = (value: 'none' | 'small' | 'medium' | 'large') => setMargin(value);
 
   const handleFiles = useCallback(async (files: FileList) => {
+    console.log('🚀 开始处理文件上传，总文件数:', files.length);
+    
     const heicFiles = Array.from(files).filter(
       (file) =>
         file.type === "image/heic" ||
@@ -59,44 +63,73 @@ export default function HeroSection() {
         )
     );
 
+    console.log('📁 HEIC文件数:', heicFiles.length, '其他文件数:', otherFiles.length);
+
     // 处理HEIC文件
     if (heicFiles.length > 0) {
-      // @ts-ignore
-      const libheif = await import("libheif-js");
-      for (const file of heicFiles) {
+      console.log('🔄 开始处理HEIC文件...');
+              const libheif = await import("libheif-js");
+      console.log('✅ libheif-js 加载成功');
+      
+      // 🔧 修复：批量处理所有文件，一次性更新状态
+      const newImages: ImageFile[] = [];
+      
+      for (let i = 0; i < heicFiles.length; i++) {
+        const file = heicFiles[i];
+        const startTime = performance.now();
+        console.log(`📸 开始处理第${i + 1}张HEIC图片:`, file.name);
+        
+        try {
         const id = Math.random().toString(36).substr(2, 9);
+          console.log(`🆔 生成图片ID:`, id);
+          
         const arrayBuffer = await file.arrayBuffer();
+          console.log(`📦 文件转ArrayBuffer成功，大小:`, arrayBuffer.byteLength);
+          
         // 1. 解码HEIC为ImageData
         const decoder = new libheif.HeifDecoder();
         const data = decoder.decode(arrayBuffer);
         const image = data[0];
         const width = image.get_width();
         const height = image.get_height();
+          console.log(`🔍 HEIC解码成功，尺寸:`, width, 'x', height);
+          
         // 2. 用Canvas渲染ImageData
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
-        if (!ctx) continue; // 2. 判空
+          if (!ctx) {
+            console.error(`❌ Canvas 2D context 创建失败，跳过图片:`, file.name);
+            continue;
+          }
+          console.log(`🎨 Canvas创建成功`);
+          
         const imageData = ctx.createImageData(width, height);
+          console.log(`🖼️ ImageData创建成功`);
+          
         // 用libheif-js的display方法填充像素
-        // 3. 显式声明displayData为any，4. Promise<void>
         await new Promise<void>((resolve, reject) => {
-          image.display(imageData, (displayData: any) => {
-            if (!displayData) return reject(new Error("HEIC display error"));
+          image.display(imageData, (displayData: unknown) => {
+              if (!displayData) {
+                console.error(`❌ HEIC display error，图片:`, file.name);
+                return reject(new Error("HEIC display error"));
+              }
             ctx.putImageData(imageData, 0, 0);
+              console.log(`✅ HEIC像素数据写入Canvas成功`);
             resolve();
           });
         });
+          
         // 3. 生成dataURL
         const preview = canvas.toDataURL("image/jpeg", 0.9);
-        // 4. 存入images状态
-        setImages((prev) => [
-          ...prev,
-          {
+          console.log(`🖼️ dataURL生成成功，长度:`, preview.length);
+          
+          // 🔧 修复：收集到数组中，不立即更新状态
+          newImages.push({
             id,
             file,
-            preview, // 这里是真实图片的dataURL
+            preview,
             name: file.name,
             rotate: 0,
             flipH: false,
@@ -105,9 +138,30 @@ export default function HeroSection() {
             contrast: 1,
             saturation: 1,
             hue: 0,
-          },
-        ]);
+          });
+          
+          const endTime = performance.now();
+          console.log(`✅ 第${i + 1}张图片处理完成，耗时:`, (endTime - startTime).toFixed(2), 'ms');
+          
+        } catch (error) {
+          console.error(`❌ 处理第${i + 1}张图片失败:`, file.name, error);
+        }
       }
+      
+      // 🚀 优化：一次性更新状态，CSS立即生效
+      if (newImages.length > 0) {
+        console.log(`📝 批量更新images状态，新增图片数:`, newImages.length);
+        setImages((prev) => {
+          const updatedImages = [...prev, ...newImages];
+          console.log(`📊 总图片数:`, prev.length, '→', updatedImages.length);
+          
+                // ✅ 移除Canvas异步处理，避免双重渲染冲突
+          
+          return updatedImages;
+        });
+      }
+      
+      console.log('🎉 HEIC文件处理完成');
     }
 
     // 处理非HEIC文件（如JPG/PNG等，保持原有逻辑）
@@ -220,6 +274,9 @@ export default function HeroSection() {
       const [{ PDFDocument }, libheif] = await Promise.all([import("pdf-lib"), import("libheif-js")])
       const pdfDoc = await PDFDocument.create()
 
+      // ✅ 在PDF导出时统一处理所有Canvas变换
+      console.log('🔄 PDF导出时统一处理Canvas变换');
+      
       for (const imageFile of images) {
         try {
           // Decode image to ImageBitmap or HTMLImageElement
@@ -235,9 +292,10 @@ export default function HeroSection() {
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext("2d");
+            if (!ctx) throw new Error("Canvas 2D context not available");
             const imageData = ctx.createImageData(width, height);
-            await new Promise((resolve, reject) => {
-              heicImage.display(imageData, (displayData) => {
+            await new Promise<void>((resolve, reject) => {
+              heicImage.display(imageData, (displayData: unknown) => {
                 if (!displayData) return reject(new Error("HEIC display error"));
                 ctx.putImageData(imageData, 0, 0);
                 resolve();
@@ -252,7 +310,7 @@ export default function HeroSection() {
               imgEl.src = URL.createObjectURL(imageFile.file);
             });
           }
-          // Use the new util for all transforms (rotation, flip, filter)
+          // ✅ 在PDF导出时应用所有变换（旋转、翻转、滤镜）
           const transformed = await transformImageWithCanvas({
             image: imageBitmap,
             rotate: imageFile.rotate,
@@ -317,9 +375,13 @@ export default function HeroSection() {
     }
   }
 
-  // 批量旋转/翻转操作
+  // ✅ 优化：批量旋转/翻转操作 - 只保留CSS实时预览
   function handleRotateFlipAll(type: 'cw' | 'ccw' | 'flipH' | 'flipV') {
-    setImages(prev => prev.map(img => {
+    console.log('🔄 开始旋转/翻转操作:', type);
+    
+    // ✅ 只更新状态，CSS立即生效，移除Canvas异步处理
+    setImages(prev => {
+      const updatedImages = prev.map(img => {
       if (type === 'cw') {
         return { ...img, rotate: (img.rotate + 90) % 360 };
       } else if (type === 'ccw') {
@@ -330,77 +392,42 @@ export default function HeroSection() {
         return { ...img, flipV: !img.flipV };
       }
       return img;
-    }));
+      });
+      
+      console.log(`📝 旋转/翻转状态更新完成，图片数:`, updatedImages.length);
+      
+      // ✅ 移除Canvas异步处理，避免双重渲染冲突
+      return updatedImages;
+    });
   }
 
-  // 批量调色参数同步
+  // ✅ 优化：批量调色参数同步 - 只保留CSS实时预览
   function handleColorAdjustAll(key: 'brightness' | 'contrast' | 'saturation' | 'hue', value: number) {
-    setImages(prev => prev.map(img => ({ ...img, [key]: value })));
+    console.log('🎨 开始调色操作:', key, '=', value);
+    
+    // ✅ 只更新状态，CSS立即生效，移除Canvas异步处理
+    setImages(prev => {
+      const updatedImages = prev.map(img => ({ ...img, [key]: value }));
+      console.log(`📝 调色状态更新完成，图片数:`, updatedImages.length);
+      
+      // ✅ 移除Canvas异步处理，避免双重渲染冲突
+      return updatedImages;
+    });
   }
 
-  // Canvas批量渲染函数
-  async function applyTransformsToAllImages(images: ImageFile[], setImages: React.Dispatch<React.SetStateAction<ImageFile[]>>) {
-    const updatedImages = await Promise.all(images.map(async (img) => {
-      let imageBitmap: ImageBitmap | HTMLImageElement;
-      if (img.file.type === "image/heic" || img.file.type === "image/heif" || img.name.toLowerCase().endsWith(".heic") || img.name.toLowerCase().endsWith(".heif")) {
-        // HEIC decode
-        const libheif = await import("libheif-js");
-        const arrayBuffer = await img.file.arrayBuffer();
-        const decoder = new libheif.HeifDecoder();
-        const data = decoder.decode(arrayBuffer);
-        const heicImage = data[0];
-        const width = heicImage.get_width();
-        const height = heicImage.get_height();
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        const imageData = ctx.createImageData(width, height);
-        await new Promise((resolve, reject) => {
-          heicImage.display(imageData, (displayData) => {
-            if (!displayData) return reject(new Error("HEIC display error"));
-            ctx.putImageData(imageData, 0, 0);
-            resolve();
-          });
-        });
-        imageBitmap = await createImageBitmap(canvas);
-      } else {
-        // JPG/PNG
-        imageBitmap = await new Promise((resolve, reject) => {
-          const imgEl = new window.Image();
-          imgEl.onload = () => resolve(imgEl);
-          imgEl.onerror = reject;
-          imgEl.src = URL.createObjectURL(img.file);
-        });
-      }
-      // Use the new util for all transforms
-      const preview = await transformImageWithCanvas({
-        image: imageBitmap,
-        rotate: img.rotate,
-        flipH: img.flipH,
-        flipV: img.flipV,
-        brightness: img.brightness,
-        contrast: img.contrast,
-        saturation: img.saturation,
-        hue: img.hue,
-      }) as string;
-      return { ...img, preview };
-    }));
-    setImages(updatedImages);
-  }
+  // ✅ 移除applyTransformsToAllImages函数，因为不再需要实时Canvas处理
+  // 所有Canvas变换现在只在PDF导出时统一处理
 
-  // 监听images参数变化，批量渲染
-  useEffect(() => {
-    if (images.length === 0) return;
-    applyTransformsToAllImages(images, setImages);
-    // eslint-disable-next-line
-  }, [images.map(img => [img.rotate, img.flipH, img.flipV]).flat().join(",")]);
+  // ✅ 移除useEffect的自动触发，避免循环调用
 
   return (
     <section className="py-12 md:py-24 lg:py-32">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center space-y-8 text-center">
           <div className="space-y-4">
+            <div className="flex justify-center mb-6">
+              <Logo size="xl" />
+            </div>
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
               Convert HEIC to PDF Online
             </h1>
@@ -505,6 +532,8 @@ export default function HeroSection() {
                               style={{
                                 maxWidth: '100%',
                                 maxHeight: '100%',
+                                // 🚀 实时预览：立即应用CSS变换
+                                transform: `rotate(${image.rotate}deg) scale(${image.flipH ? -1 : 1}, ${image.flipV ? -1 : 1})`,
                                 filter: `brightness(${image.brightness}) contrast(${image.contrast}) saturate(${image.saturation}) hue-rotate(${image.hue}deg)`
                               }}
                             />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 // SVG 图标组件
 const RotateCwIcon = () => (
@@ -94,9 +94,7 @@ function RotateDropdown({ onRotateFlip }: { onRotateFlip: (type: 'cw' | 'ccw' | 
     </div>
   );
 }
-// 统一下拉菜单项动效样式
-const dropdownItemClass =
-  "block w-full text-left px-4 py-2 text-sm font-medium border-b last:border-b-0 border-gray-100 transition-all duration-200 group hover:bg-blue-100 group-hover:translate-x-[2px]";
+
 
 // PageSizeSelect
 function PageSizeSelect({ pageSize, onPageSizeChange }: {
@@ -144,7 +142,7 @@ function PageSizeSelect({ pageSize, onPageSizeChange }: {
   );
 }
 // ColorAdjustDropdown
-function ColorAdjustDropdown({ onColorAdjust, values }: { onColorAdjust: (key: 'brightness' | 'contrast' | 'saturation' | 'hue', value: number) => void, values?: any }) {
+function ColorAdjustDropdown({ onColorAdjust, values }: { onColorAdjust: (key: 'brightness' | 'contrast' | 'saturation' | 'hue', value: number) => void, values?: Record<string, number> }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -299,7 +297,8 @@ export default function EditToolbar({ onRotateFlip, onColorAdjust, pageSize, onP
       <PageSizeSelect pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
       <ColorAdjustDropdown onColorAdjust={handleColorAdjust} values={colorAdjust} />
       <MarginSelect value={margin} onChange={onMarginChange} />
-      <CutoutDropdown />
+      {/* 暂时隐藏 Cutout 功能，待AI抠图功能完成后恢复 */}
+      {/* <CutoutDropdown /> */}
     </div>
   );
 } 

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Logo from "./logo"
 
 export default function Footer() {
   return (
@@ -6,7 +7,9 @@ export default function Footer() {
       <div className="container px-4 md:px-6">
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <h3 className="text-lg font-semibold mb-4">HEICtoPDF.shop</h3>
+            <div className="mb-4">
+              <Logo size="md" showText={true} />
+            </div>
             <p className="text-muted-foreground mb-4">
               The fastest and most secure way to convert HEIC images to PDF online. Process your files locally with
               complete privacy and security.
@@ -41,7 +44,7 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <span className="text-muted-foreground">Email: support@heictopdf.shop</span>
+                <span className="text-muted-foreground">Email: yiner2396@gmail.com</span>
               </li>
               <li>
                 <span className="text-muted-foreground">Response time: 24 hours</span>

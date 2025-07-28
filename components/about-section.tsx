@@ -8,7 +8,7 @@ export default function AboutSection() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl mb-4">About HEIC and PDF Formats</h2>
           <p className="mx-auto max-w-[700px] text-muted-foreground md:text-lg">
-            Understanding the formats you're working with
+            Understanding the formats you&apos;re working with
           </p>
         </div>
 
@@ -20,7 +20,7 @@ export default function AboutSection() {
                 <h3 className="text-xl font-semibold">HEIC Format</h3>
               </div>
               <p className="text-muted-foreground mb-4">
-                HEIC (High Efficiency Image Container) is Apple's modern image format that provides better compression
+                HEIC (High Efficiency Image Container) is Apple&apos;s modern image format that provides better compression
                 than JPEG while maintaining high quality.
               </p>
               <ul className="text-sm text-muted-foreground space-y-2">

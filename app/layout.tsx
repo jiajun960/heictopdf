@@ -2,9 +2,14 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'HEICtoPDF.shop - Convert HEIC to PDF Online',
+  description: 'Fast, free, and secure HEIC to PDF conversion in your browser. No upload required - process files locally.',
+  generator: 'Next.js',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 }
 
 export default function RootLayout({
