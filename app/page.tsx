@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Convert HEIC to PDF Online - HEICtoPDF.shop",
     description: "Fast, free, and secure HEIC to PDF conversion in your browser",
-    url: "https://heictopdf.shop",
+    url: "https://www.heictopdf.shop",
     siteName: "HEICtoPDF.shop",
     type: "website",
   },

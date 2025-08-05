@@ -20,15 +20,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google tag (gtag.js) */}
+        {/* Google tag (gtag.js) - 延迟加载 */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-VVGDWN5YDN"></script>
         <script dangerouslySetInnerHTML={{ __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-VVGDWN5YDN');
+          gtag('config', 'G-VVGDWN5YDN', {
+            page_title: document.title,
+            page_location: window.location.href
+          });
         ` }} />
-        {/* Microsoft Clarity */}
+        {/* Microsoft Clarity - 延迟加载 */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function(c,l,a,r,i,t,y){
               c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
