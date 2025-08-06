@@ -6,20 +6,20 @@ export default function Footer() {
     <footer className="border-t py-12">
       <div className="container px-4 md:px-6">
         <div className="grid md:grid-cols-4 gap-8">
-          <div className="md:col-span-2">
-            <div className="mb-4">
+          {/* LOGO+简介 */}
+          <div className="text-center">
+            <div className="mb-4 flex justify-center">
               <Logo size="md" showText={true} />
             </div>
-            <p className="text-muted-foreground mb-4">
-              The fastest and most secure way to convert HEIC images to PDF online. Process your files locally with
-              complete privacy and security.
+            <p className="text-muted-foreground mb-4 text-sm">
+              The fastest and most secure way to convert HEIC images to PDF online. Process your files locally with complete privacy and security.
             </p>
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} HEICtoPDF.shop. All rights reserved.
             </p>
           </div>
-
-          <div>
+          {/* Quick Links */}
+          <div className="text-center">
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
               <li>
@@ -39,8 +39,8 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
-          <div>
+          {/* Support */}
+          <div className="text-center">
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm">
               <li>
@@ -48,6 +48,34 @@ export default function Footer() {
               </li>
               <li>
                 <span className="text-muted-foreground">Response time: 24 hours</span>
+              </li>
+            </ul>
+          </div>
+          {/* More Tools */}
+          <div className="text-center">
+            <h4 className="font-semibold mb-4">More Tools</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a
+                  href="https://www.tiktokemojis.pics/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  title="Discover and copy all hidden TikTok emojis. Boost your TikTok engagement with secret emoji codes!"
+                >
+                  TikTok Emoji Explorer
+                </a>
+              </li>
+              <li>
+                <a
+                  href="http://theskipto.xyz/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  title="A curated directory of essential tools for indie developers. Find the best resources for every stage of your project."
+                >
+                  SkipTo Toolbox
+                </a>
               </li>
             </ul>
           </div>
