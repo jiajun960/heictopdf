@@ -39,6 +39,8 @@ export default function RootLayout({
               y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           })(window, document, "clarity", "script", "slraxjos5c");
         ` }} />
+        {/* Ahrefs Web Analytics - 延迟加载 */}
+        <script async src="https://analytics.ahrefs.com/analytics.js" data-key="F89E0S0dK8m2Ju7RSfiy8w"></script>
       </head>
       <body>{children}</body>
     </html>
